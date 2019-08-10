@@ -611,6 +611,7 @@ public class RtspServer : IDisposable
     // If there are RTSP clients connected then Compress the Video Frame (with H264) and send it to the client
     void video_source_ReceivedYUVFrame(string deviceId, uint timestamp_ms, byte[] yuv_data, bool isKeyFrame)
     {
+        //TODO: change function name and param yuv_data, not receive YUV anymore. It's encoded frame data(h264 for now).
         DateTime now = DateTime.UtcNow;
         int current_rtp_play_count = 0;
         int current_rtp_count = 0;
@@ -657,8 +658,7 @@ public class RtspServer : IDisposable
         // Compress the video (YUV to H264)
         //byte[] raw_video_nal = h264_encoder.CompressFrame(yuv_data);
         byte[] raw_video_nal = yuv_data;
-        Boolean isKeyframe = isKeyFrame; // SimpleH264encoder and TinyH24encoder only emit keyframes
-
+        Boolean isKeyframe = isKeyFrame;
 
         List<byte[]> nal_array = new List<byte[]>();
         

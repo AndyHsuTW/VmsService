@@ -24,6 +24,9 @@ namespace ACTi.NVR3.OemDvrMiniDriver
     /// A shamelessly copied example with some tweaks to accommodate our purposes.
     /// Needless to say, it is very much a means of rendering moving video on to a .NET surface using Media Foundation,
     ///		rather than a definitive example of how a DVR supplier should actually implement.
+    ///		
+    /// ACTi:
+    ///   OpenKmpeg => ImageCallback
     /// </summary>
     public class WmfPlayer
     {
@@ -170,6 +173,7 @@ namespace ACTi.NVR3.OemDvrMiniDriver
                 {
                     // try close before open
                     Task close = Task.Run(CloseKmpeg);
+                    // TODO: check continueWith works well
                     close.ContinueWith(task =>
                      {
                          if (task.Exception != null)
