@@ -12,12 +12,21 @@ namespace RtspCameraExample
 {
     class NvrDemo
     {
+        /// <summary>
+        /// Default timeout milliseconds.
+        /// </summary>
+        public const int ConnectionTimeout = 5000;
+
         private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         private static HttpClient _httpClient { get; set; }
         private int _deviceId { get; set; }
         private string _syncSession { get; set; }
         public bool IsStarted { get; set; }
+        /// <summary>
+        /// NVR URL. IP or domain name.
+        /// </summary>
+        public string Url { get; set; }
 
         // Events that applications can receive
         public event ReceivedYUVFrameHandler ReceivedYUVFrame;
@@ -35,9 +44,10 @@ namespace RtspCameraExample
 
         public NvrDemo(string baseUrl, string user, string password, int deviceId, string syncSession)
         {
+            this.Url = baseUrl;
             _httpClient = new HttpClient()
             {
-                BaseAddress = new Uri(baseUrl)
+                BaseAddress = new Uri(this.Url)
             };
             var authBytes = Encoding.ASCII.GetBytes(String.Format($"{user}:{password}"));
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(authBytes));

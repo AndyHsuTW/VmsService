@@ -57,8 +57,8 @@
         /// </summary>
         public void Start()
         {
-            _listenTread = new Thread(new ThreadStart(DoJob));
-            _listenTread.Name = "DoJob";
+            _listenTread = new Thread(new ThreadStart(ReadRtspJob));
+            _listenTread.Name = "ReadRtspJob";
             _listenTread.Start();
         }
 
@@ -120,7 +120,7 @@
         /// If it a response it add the associate question.
         /// The stopping is made by the closing of the TCP connection.
         /// </remarks>
-        private void DoJob()
+        private void ReadRtspJob()
         {
             try
             {

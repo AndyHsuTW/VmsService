@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Threading;
 
 namespace RtspCameraExample
@@ -9,16 +10,17 @@ namespace RtspCameraExample
 
         static async System.Threading.Tasks.Task Main(string[] args)
         {
-
             AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper;
 
             int port = 8554;
-			string username = "account";      // or use NUL if there is no username
-			string password = "pwd";  // or use NUL if there is no password
-            
-            RtspServer s = new RtspServer(port,username,password);
+			string username = ConfigurationManager.AppSettings["NvrAccount"];      // or use NUL if there is no username
+			string password = ConfigurationManager.AppSettings["NvrPwd"];  // or use NUL if there is no password
+            // Start listen to specific port, NVR IP, Account, Password is read from config file
+            // Channel is controlled by RTSP url parameter:["deviceId"] ["streamId"] ["unixTimestamp"]
+            // ex:  RTSP://account:pwd@127.0.0.1:8554?deviceId=3&streamId=1&unixTimestamp=1565418793649
+            RtspServer s = new RtspServer(port, username, password);
             try {
-                s.StartListenAsync();
+                s.StartListen();
             } catch {
                 Console.WriteLine("Error: Could not start server");
                 return;
@@ -36,7 +38,7 @@ namespace RtspCameraExample
                 readline = Console.ReadLine();
 
                 // Avoid maxing out CPU on systems that instantly return null for ReadLine
-                if (readline == null) Thread.Sleep(500);
+                if (readline == null) SpinWait.SpinUntil(() => false, 500);
             }
 
             s.StopListen();

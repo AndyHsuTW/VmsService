@@ -93,9 +93,9 @@ public class RtspServer : IDisposable
     }
 
     /// <summary>
-    /// Starts the listen.
+    /// Starts the RTSP listen thread.
     /// </summary>
-    public async System.Threading.Tasks.Task StartListenAsync()
+    public void StartListen()
     {
         _RTSPServerListener.Start();
 
@@ -113,17 +113,17 @@ public class RtspServer : IDisposable
         //video_source.ReceivedYUVFrame += video_source_ReceivedYUVFrame;
 
         // video 2
-        NvrDemo nvr1 = new NvrDemo("http://172.16.26.96:8080/", "admin", "123456", 3, "12312");
-        nvr1.ReceivedYUVFrame += video_source_ReceivedYUVFrame;
+        //NvrDemo nvr1 = new NvrDemo("http://172.16.26.96:8080/", "admin", "123456", 3, "12312");
+        //nvr1.ReceivedYUVFrame += video_source_ReceivedYUVFrame;
 
-        var playbackTask = nvr1.PlaybackAsync();
-        SpinWait.SpinUntil(() => nvr1.IsStarted);
+        //var playbackTask = nvr1.PlaybackAsync();
+        //SpinWait.SpinUntil(() => nvr1.IsStarted);
 
-        await nvr1.SetCurrentTimeAsync(DateTime.Parse("2019-04-15 11:30"));
-        await nvr1.SetPlayModeAsync(NvrDemo.PlayModeAction.Forward, 1);
-        await nvr1.StartPlayAsync();
+        //await nvr1.SetCurrentTimeAsync(DateTime.Parse("2019-04-15 11:30"));
+        //await nvr1.SetPlayModeAsync(NvrDemo.PlayModeAction.Forward, 1);
+        //await nvr1.StartPlayAsync();
 
-        await playbackTask;
+        //await playbackTask;
 
         //video 3
         //TestJpegH264 testJpeg = new TestJpegH264();
@@ -165,7 +165,6 @@ public class RtspServer : IDisposable
 
                 // Add the RtspListener to the RTSPConnections List
                 
-
                 newListener.Start();
             }
         }
@@ -215,8 +214,8 @@ public class RtspServer : IDisposable
         // Cast the 'sender' and 'e' into the RTSP Listener (the Socket) and the RTSP Message
         Rtsp.RtspListener listener = sender as Rtsp.RtspListener;
         Rtsp.Messages.RtspMessage message = e.Message as Rtsp.Messages.RtspMessage;
-
-        Console.WriteLine("RTSP message received " + message);
+        _logger.Debug($"RTSP message received {message}");
+        Console.WriteLine();
         var deviceId = "";
         var streamId = "";
         var unixTimestamp = 0;
@@ -229,7 +228,7 @@ public class RtspServer : IDisposable
 
             int.TryParse(rtspParameters["unixTimestamp"], out unixTimestamp);
             startTime = startTime.AddSeconds(unixTimestamp);
-            Console.WriteLine($"{rtspParameters["deviceId"]}, {rtspParameters["streamId"]},{rtspParameters["unixTimestamp"]}");
+            _logger.Debug($"{rtspParameters["deviceId"]}, {rtspParameters["streamId"]},{rtspParameters["unixTimestamp"]}");
 
         }
         if (String.IsNullOrEmpty(deviceId))
