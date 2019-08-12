@@ -70,9 +70,11 @@
   <ItemGroup>
     <Compile Include="CJOCh264bitstream.cs" />
     <Compile Include="CJOCh264encoder.cs" />
+    <Compile Include="EncoderHelper.cs" />
     <Compile Include="Extensions\BinaryReaderExtension.cs" />
     <Compile Include="KMPEG4.cs" />
     <Compile Include="NvrDemo.cs" />
+    <Compile Include="NvrExporter\NvrExport.cs" />
     <Compile Include="NVR\DataStruct.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

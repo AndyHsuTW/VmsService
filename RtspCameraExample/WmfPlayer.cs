@@ -120,6 +120,10 @@ namespace ACTi.NVR3.OemDvrMiniDriver
         public event ReceivedYUVFrameHandler ReceivedYUVFrame;
         // Delegated functions (essentially the function prototype)
         public delegate void ReceivedYUVFrameHandler(string deviceId, uint timestamp, byte[] data, bool isKeyFrame);
+
+        public event ReceiveNvrFrameHandler OnReceiveNvrFrame;
+        public delegate void ReceiveNvrFrameHandler(WmfPlayer sender, uint timestamp, Bitmap bitmap);
+
         private OpenH264Lib.Encoder _h264Encoder { get; set; }
         private Stopwatch _stopwatch { get; set; }
 
@@ -134,7 +138,6 @@ namespace ACTi.NVR3.OemDvrMiniDriver
             
             _stopwatch = new Stopwatch();
             _stopwatch.Start();
-
         }
 
         /// <summary>
@@ -540,10 +543,10 @@ namespace ACTi.NVR3.OemDvrMiniDriver
             int width = Convert.ToInt32(originImage.Width * times);
             int height = Convert.ToInt32(originImage.Height * times);
 
-            return Process(originImage, originImage.Width, originImage.Height, width, height);
+            return ResizeBitmap(originImage, originImage.Width, originImage.Height, width, height);
         }
 
-        private static Bitmap Process(Bitmap originImage, int oriwidth, int oriheight, int width, int height)
+        public static Bitmap ResizeBitmap(Bitmap originImage, int oriwidth, int oriheight, int width, int height)
         {
             Bitmap resizedbitmap = new Bitmap(width, height);
             Graphics g = Graphics.FromImage(resizedbitmap);
@@ -563,37 +566,10 @@ namespace ACTi.NVR3.OemDvrMiniDriver
                 int bytesPerPixel = (bitsPerPixel + 7) / 8;
                 int stride = ((Convert.ToInt16(e.dwWidth) * bytesPerPixel + 3) / 4) * 4;
 
-                using (Bitmap oBitmap = new Bitmap(Convert.ToInt32(e.dwWidth), Convert.ToInt32(System.Math.Abs(e.dwHeight)), stride, format, e.Buffer))//.Format32bppRgb  
+                Bitmap bitmap = new Bitmap(Convert.ToInt32(e.dwWidth), Convert.ToInt32(System.Math.Abs(e.dwHeight)), stride, format, e.Buffer);
+                if (OnReceiveNvrFrame != null)
                 {
-                    if (_h264Encoder == null)
-                    {
-                        OpenH264Lib.Encoder.OnEncodeCallback onEncode = (data, length, frameType) =>
-                        {
-                            var keyFrame = (frameType == OpenH264Lib.Encoder.FrameType.IDR) || (frameType == OpenH264Lib.Encoder.FrameType.I);
-                            //writer.AddImage(data, keyFrame);
-                            if (ReceivedYUVFrame != null)
-                            {
-                                if (data == null)
-                                {
-                                    logger.Warn($"onEncode get null data");
-                                }
-                                try
-                                {
-                                    ReceivedYUVFrame(m_SelectID, (uint)_stopwatch.ElapsedMilliseconds, data, keyFrame);
-                                }
-                                catch (Exception ex)
-                                {
-                                    logger.Error(ex.ToString());
-                                }
-                            }
-                        };
-
-                        _h264Encoder = new OpenH264Lib.Encoder(@"lib\openh264-1.8.0-win32.dll");
-                        _h264Encoder.Setup(640, 480, 5000000, 10, 2.0f, onEncode);
-                    }
-                    var resizedBitmap = Process(oBitmap, oBitmap.Width, oBitmap.Height, 640, 480);
-                    this.HasVideo = true;
-                    _h264Encoder.Encode(resizedBitmap, _stopwatch.ElapsedMilliseconds);
+                    OnReceiveNvrFrame(this, (uint)_stopwatch.ElapsedMilliseconds, bitmap);
                 }
             }
             catch(Exception ex)

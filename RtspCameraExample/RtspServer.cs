@@ -16,6 +16,7 @@ using System.Xml.Serialization;
 using RtspCameraExample.NVR;
 using Rtsp.Messages;
 using System.Linq;
+using System.Drawing;
 
 // RTSP Server Example (c) Roger Hardiman, 2016, 2018
 // Released uder the MIT Open Source Licence
@@ -48,9 +49,15 @@ public class RtspServer : IDisposable
 
     private TestCard video_source = null;
     private SimpleH264Encoder h264_encoder = null;
+
+    #region DeviceId mapping resources
+
     //private static ConcurrentDictionary<string,SimpleH264Encoder> _h264encoderList = new ConcurrentDictionary<string,SimpleH264Encoder>();
     private static ConcurrentDictionary<string, WmfPlayer> _nvrPlayerList = new ConcurrentDictionary<string, WmfPlayer>();
     private static ConcurrentDictionary<string, List<RTSPConnection>> _rtspList = new ConcurrentDictionary<string, List<RTSPConnection>>();
+    private static ConcurrentDictionary<string, EncoderHelper> _h264EncoderList = new ConcurrentDictionary<string, EncoderHelper>();
+
+    #endregion
 
     private string _nvrIp = ConfigurationManager.AppSettings["NvrIp"];
     private string _nvrPort = ConfigurationManager.AppSettings["NvrPort"];
@@ -350,12 +357,26 @@ public class RtspServer : IDisposable
                     _logger.Error(ex.ToString());
                 }
                 //TODO open wmfplayer by session (device + stream or device + stream + IP&Port + playback time)
+                // only deviceId may cause different user watch deviceId conflict
                 WmfPlayer wmfPlayer = new WmfPlayer(new IntPtr(Int32.Parse(deviceId)));
                 wmfPlayer.m_SelectID = deviceId;
                 if (_nvrPlayerList.TryAdd(deviceId, wmfPlayer))
                 {
-                    wmfPlayer.ReceivedYUVFrame += video_source_ReceivedYUVFrame;
+                    wmfPlayer.OnReceiveNvrFrame += OnReceiveNvrFrame;
                     await wmfPlayer.OpenVideoAsync(_nvrIp, uint.Parse(_nvrPort), authInfo.Username, authInfo.Password, startTime, 1, deviceId, int.Parse(streamId));
+                }
+                else
+                {
+                    _logger.Warn($"NvrPlayerList key already exists:{_nvrPlayerList.ContainsKey(deviceId)}");
+                }
+
+                if (!_h264EncoderList.ContainsKey(deviceId))
+                {
+                    EncoderHelper encoderHelper = new EncoderHelper(deviceId, video_source_ReceivedYUVFrame);
+                    if (!_h264EncoderList.TryAdd(deviceId, encoderHelper))
+                    {
+                        _logger.Warn($"Add h264EncoderList failed due to key already exist:{_h264EncoderList.ContainsKey(deviceId)}");
+                    }
                 }
             }
         }
@@ -607,10 +628,35 @@ public class RtspServer : IDisposable
 
     }
 
+    /// <summary>
+    /// Callback when player decoded frames from NVR3.
+    /// Will encode the decoded frame to H264 than pass to RTSP output
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="timestamp"></param>
+    /// <param name="bitmap"></param>
+    private void OnReceiveNvrFrame(WmfPlayer sender, uint timestamp, Bitmap bitmap)
+    {
+        string deviceId = sender.m_SelectID;
+        EncoderHelper encoderHelper = null;
+
+        encoderHelper = _h264EncoderList[deviceId];
+        if (encoderHelper == null)
+        {
+            _logger.Warn("ReceiveNvrFrame but no encoder instance to continue.");
+            return;
+        }
+        var resizedBitmap = WmfPlayer.ResizeBitmap(bitmap, bitmap.Width, bitmap.Height, encoderHelper.Width, encoderHelper.Height);
+        // OnEncode callback will go to video_source_ReceivedYUVFrame
+        encoderHelper.OpenH264Encoder.Encode(resizedBitmap, timestamp);
+        bitmap.Dispose();
+    }
+
     // The 'Camera' (YUV TestCard) has generated a YUV image.
     // If there are RTSP clients connected then Compress the Video Frame (with H264) and send it to the client
-    void video_source_ReceivedYUVFrame(string deviceId, uint timestamp_ms, byte[] yuv_data, bool isKeyFrame)
+    void video_source_ReceivedYUVFrame(EncoderHelper sender, uint timestamp_ms, byte[] yuv_data, bool isKeyFrame)
     {
+        string deviceId = sender.Id;
         //TODO: change function name and param yuv_data, not receive YUV anymore. It's encoded frame data(h264 for now).
         DateTime now = DateTime.UtcNow;
         int current_rtp_play_count = 0;
