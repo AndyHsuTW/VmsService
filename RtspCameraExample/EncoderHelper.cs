@@ -13,6 +13,8 @@ namespace RtspCameraExample
     /// </summary>
     class EncoderHelper
     {
+        private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+
         public OpenH264Lib.Encoder OpenH264Encoder { get; set; }
         /// <summary>
         /// Id for user to implement instance mapping logic.
@@ -29,7 +31,6 @@ namespace RtspCameraExample
         /// Stopwatch for video timestamp
         /// </summary>
         private Stopwatch _stopwatch { get; set; }
-        private static NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 
         #endregion
 

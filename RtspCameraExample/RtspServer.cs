@@ -48,7 +48,7 @@ public class RtspServer : IDisposable
     private Thread _ListenTread;
 
     private TestCard video_source = null;
-    private SimpleH264Encoder h264_encoder = null;
+    private SimpleH264Encoder h264_encoder { get; set; }
 
     #region DeviceId mapping resources
 
@@ -358,8 +358,7 @@ public class RtspServer : IDisposable
                 }
                 //TODO open wmfplayer by session (device + stream or device + stream + IP&Port + playback time)
                 // only deviceId may cause different user watch deviceId conflict
-                WmfPlayer wmfPlayer = new WmfPlayer(new IntPtr(Int32.Parse(deviceId)));
-                wmfPlayer.m_SelectID = deviceId;
+                WmfPlayer wmfPlayer = new WmfPlayer();
                 if (_nvrPlayerList.TryAdd(deviceId, wmfPlayer))
                 {
                     wmfPlayer.OnReceiveNvrFrame += OnReceiveNvrFrame;
@@ -637,7 +636,7 @@ public class RtspServer : IDisposable
     /// <param name="bitmap"></param>
     private void OnReceiveNvrFrame(WmfPlayer sender, uint timestamp, Bitmap bitmap)
     {
-        string deviceId = sender.m_SelectID;
+        string deviceId = sender.VideoConnectInfo.SelectID;
         EncoderHelper encoderHelper = null;
 
         encoderHelper = _h264EncoderList[deviceId];

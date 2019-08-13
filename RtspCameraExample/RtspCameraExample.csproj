@@ -72,7 +72,10 @@
     <Compile Include="CJOCh264encoder.cs" />
     <Compile Include="EncoderHelper.cs" />
     <Compile Include="Extensions\BinaryReaderExtension.cs" />
-    <Compile Include="KMPEG4.cs" />
+    <Compile Include="KMPEG4\KMPEG4.cs" />
+    <Compile Include="KMPEG4\FilePlayCompleteEventArgs.cs" />
+    <Compile Include="KMPEG4\ImageEventArgs.cs" />
+    <Compile Include="KMPEG4\TimeCodeCallbackExEventArgs.cs" />
     <Compile Include="NvrDemo.cs" />
     <Compile Include="NvrExporter\NvrExport.cs" />
     <Compile Include="NVR\DataStruct.cs" />

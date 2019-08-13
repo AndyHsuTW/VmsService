@@ -5,9 +5,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ACTi.NVR3.OemDvrMiniDriver
+namespace RtspCameraExample.KMPEG4
 {
-    class KMPEG4
+    public class KMPEG4
     {
         #region DllImport KMPEG4
         [DllImport("KMpeg4.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "KOpenInterface")]
@@ -55,6 +55,8 @@ namespace ACTi.NVR3.OemDvrMiniDriver
         [DllImport("KMpeg4.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "KGetPortInfoByHTTP")]
         public static extern bool KGetPortInfoByHTTP(IntPtr Handel, ref Media_Port_Info mri, IntPtr httpIp, uint HTTPPort, IntPtr UID, IntPtr PWD, uint ChannelNO);
         //public static extern bool KGetPortInfoByHTTP(IntPtr Handel, ref Media_Port_Info mri, string httpIp, uint HTTPPort, string UID, string PWD, uint ChannelNO);
+        [DllImport("KMpeg4.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "KGetVideoConfig3")]
+        public static extern bool KGetVideoConfig3(IntPtr handel, ref Media_Video_Config3 videoConfig);
 
         [DllImport("KMpeg4.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "KSetAfterRenderCallbackEx")]
         public static extern void KSetAfterRenderCallbackEx(IntPtr Handel, uint userParam, AfterRenderCallbackEx fnAfterRenderCallback);
@@ -395,6 +397,34 @@ namespace ACTi.NVR3.OemDvrMiniDriver
             public uint PORT_Streaming;			///< Streaming Port
             public uint PORT_Multicast;			///< Multicast Port
             public uint PORT_RTSP;				///< RTSP Port
+        }
+
+        [StructLayoutAttribute(LayoutKind.Sequential)]
+        public struct Media_Video_Config3
+        {
+            /// <summary>
+            /// 1:MPEG4 4:MPEG4 5:H264
+            /// </summary>
+            public short Encoder;
+            /// <summary>
+            /// NTSC (0), PAL (1).
+            /// </summary>
+            public short TvStander;
+            public uint Width;
+            public uint Height;
+            public short BitsRate;
+            /// <summary>
+            /// 0 ~ 100 : Low ~ High
+            /// </summary>
+            public short Quality; 
+            public short VideoBrightness;
+            public short VideoContrast;
+            public short VideoSaturation;
+            public short VideoHue;
+            /// <summary>
+            /// 0 ~ 30 frame pre second
+            /// </summary>
+            public short Fps;
         }
 
         [StructLayoutAttribute(LayoutKind.Sequential)]

@@ -1,5 +1,7 @@
-﻿using System;
+﻿using RtspCameraExample.NvrExporter;
+using System;
 using System.Configuration;
+using System.Diagnostics;
 using System.Threading;
 
 namespace RtspCameraExample
@@ -11,7 +13,22 @@ namespace RtspCameraExample
         static async System.Threading.Tasks.Task Main(string[] args)
         {
             AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionTrapper;
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            NvrExport export = new NvrExport();
+            var filePath1 = @"D:\tmp\NvrExporter\Channel07_20190812172500_UTC+0800.raw";
+            export.TestExportAsync(filePath1);
 
+            //NvrExport export2 = new NvrExport();
+            //var filePath2 = @"D:\tmp\NvrExporter\Channel07_20190812172600_UTC+0800.raw";
+            //export2.TestExportAsync(filePath2);
+
+            //SpinWait.SpinUntil(()=>
+            //{
+            //    return export.IsExportFinish && export2.IsExportFinish;
+            //});
+            stopwatch.Stop();
+            _logger.Info($"Export done using {stopwatch.ElapsedMilliseconds} milliseconds");
             int port = 8554;
 			string username = ConfigurationManager.AppSettings["NvrAccount"];      // or use NUL if there is no username
 			string password = ConfigurationManager.AppSettings["NvrPwd"];  // or use NUL if there is no password
