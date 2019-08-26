@@ -45,6 +45,9 @@
     <Reference Include="Accord.Video.FFMPEG, Version=3.8.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=x86">
       <HintPath>..\packages\Accord.Video.FFMPEG.3.8.0\lib\net462\Accord.Video.FFMPEG.dll</HintPath>
     </Reference>
+    <Reference Include="FFMpegSharp, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FFMpegSharp.2.1.0\lib\net45\FFMpegSharp.dll</HintPath>
+    </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.6.6\lib\net45\NLog.dll</HintPath>
     </Reference>
@@ -75,6 +78,7 @@
     <Compile Include="KMPEG4\KMPEG4.cs" />
     <Compile Include="KMPEG4\FilePlayCompleteEventArgs.cs" />
     <Compile Include="KMPEG4\ImageEventArgs.cs" />
+    <Compile Include="KMPEG4\RawDataEventArgs.cs" />
     <Compile Include="KMPEG4\TimeCodeCallbackExEventArgs.cs" />
     <Compile Include="NvrDemo.cs" />
     <Compile Include="NvrExporter\NvrExport.cs" />
@@ -91,6 +95,45 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="FFMPEG\bin\presets\ffprobe.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="FFMPEG\bin\presets\libvpx-1080p.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libvpx-1080p50_60.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libvpx-360p.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libvpx-720p.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libvpx-720p50_60.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libvpx-ultrafast.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-baseline.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-fast.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-faster.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-faster_firstpass.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-fast_firstpass.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-ipod320.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-ipod640.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-lossless_fast.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-lossless_max.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-lossless_medium.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-lossless_slow.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-lossless_slower.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-lossless_ultrafast.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-main.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-medium.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-medium_firstpass.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-placebo.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-placebo_firstpass.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-slow.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-slower.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-slower_firstpass.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-slow_firstpass.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-superfast.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-superfast_firstpass.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-ultrafast.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-ultrafast_firstpass.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-veryfast.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-veryfast_firstpass.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-veryslow.ffpreset" />
+    <None Include="FFMPEG\bin\presets\libx264-veryslow_firstpass.ffpreset" />
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
@@ -109,6 +152,10 @@
     <Content Include="FFMCodec.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="FFMPEG\bin\x64\ffmpeg.exe" />
+    <Content Include="FFMPEG\bin\x64\ffprobe.exe" />
+    <Content Include="FFMPEG\bin\x86\ffmpeg.exe" />
+    <Content Include="FFMPEG\bin\x86\ffprobe.exe" />
     <Content Include="FisheyeSDK.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

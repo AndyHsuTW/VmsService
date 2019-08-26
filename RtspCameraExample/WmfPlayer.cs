@@ -56,6 +56,9 @@ namespace ACTi.NVR3.OemDvrMiniDriver
         private DateTime m_ViewUTCTime;
         private DateTime m_DefaultUTCTime;
 
+        
+        private List<EventHandler<RawDataEventArgs>> m_RawDataEventHandlers { get; set; }
+        private KMPEG4.RawDataCallback m_RawDataCallback { get; set; }
         private List<EventHandler<ImageEventArgs>> m_ImageEventHandlers { get; set; }
         private KMPEG4.ImageCallback3 m_ImageCallback3 { get; set; }
         private List<EventHandler<TimeCodeCallbackExEventArgs>> m_TimeCodeExHandlers { get; set; }
@@ -427,9 +430,10 @@ namespace ACTi.NVR3.OemDvrMiniDriver
             }
             else
             {
-                time = Convert.ToUInt32((connectInfo.StartTime - new DateTime(1970, 1, 1)).TotalSeconds);
-                ConnSession = Guid.NewGuid().ToString();
+                //time = Convert.ToUInt32((connectInfo.StartTime - new DateTime(1970, 1, 1)).TotalSeconds);
+                ConnSession = "11223344";
                 mediaConfig.ContactType = (int)KMPEG4.CONTACT_TYPE.CONTACT_TYPE_HTTP_WOC_PREVIEW;
+                mediaConfig.ConnectTimeOut = 3;
                 mediaConfig.HTTPPort = connectInfo.Port;
                 mediaConfig.Password = connectInfo.Password;
                 mediaConfig.UniCastIP = connectInfo.HostName;
@@ -542,6 +546,56 @@ namespace ACTi.NVR3.OemDvrMiniDriver
         {
             if (m_FilePlayCompleteEventHandlers == null) return;
             var list = m_FilePlayCompleteEventHandlers.ToArray();
+            foreach (var i in list)
+            {
+                if (i == null) continue;
+                i(this, e);
+            }
+        }
+
+        public event EventHandler<RawDataEventArgs> InstallRawDataCallback
+        {
+            add
+            {
+                if (value == null) return;
+                if (m_RawDataEventHandlers == null)
+                {
+                    m_RawDataEventHandlers = new List<EventHandler<RawDataEventArgs>>();
+                    m_RawDataCallback = new KMPEG4.RawDataCallback(OnKmpegRawDataCallback);
+                    KMPEG4.KSetRawDataCallback(m_KMPEGHandle, 0, m_RawDataCallback);
+                }
+                m_RawDataEventHandlers.Add(value);
+            }
+
+            remove
+            {
+                if (value == null) return;
+                if (m_RawDataEventHandlers == null) return;
+                if (!m_RawDataEventHandlers.Contains(value)) return;
+                m_RawDataEventHandlers.Remove(value);
+                if (m_RawDataEventHandlers.Count >= 1) return;
+                m_RawDataCallback = null;
+                m_RawDataEventHandlers = null;
+                KMPEG4.KSetRawDataCallback(m_KMPEGHandle, 0, null);
+            }
+        }
+
+        /// <summary>
+        /// Only for bypass KMPEG event.
+        /// </summary>
+        /// <param name="userParam"></param>
+        /// <param name="dwdataType"></param>
+        /// <param name="buf"></param>
+        /// <param name="len"></param>
+        public void OnKmpegRawDataCallback(uint userParam, uint dwdataType, IntPtr buf, uint len)
+        {
+            OnRawDataCallback(new RawDataEventArgs(userParam, dwdataType, buf, len));
+        }
+
+        protected virtual void OnRawDataCallback(RawDataEventArgs e)
+        {
+            if (m_RawDataEventHandlers == null) return;
+            var list = m_RawDataEventHandlers.ToArray();
             foreach (var i in list)
             {
                 if (i == null) continue;
@@ -709,7 +763,7 @@ namespace ACTi.NVR3.OemDvrMiniDriver
         private void OnTimeCodeRecive(object sender, TimeCodeCallbackExEventArgs e)
         {
             m_ViewUTCTime = m_DefaultUTCTime.AddSeconds(e.TimeVal.tv_sec).AddMilliseconds(e.TimeVal.tv_usec / 1000);
-            //logger.Trace($"{m_ViewUTCTime.ToString("yyyy-MM-dd HH:mm:ss.fff")}");
+            logger.Trace($"{m_ViewUTCTime.ToString("yyyy-MM-dd HH:mm:ss.fff")}");
         }
 
         /// <summary>
